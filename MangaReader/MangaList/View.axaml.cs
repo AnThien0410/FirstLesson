@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using MangaReader.DomainCommon;
 
 
 namespace MangaReader.MangaList;
@@ -13,6 +14,7 @@ namespace MangaReader.MangaList;
 public partial class View : Window, IView
 {
     private readonly Presenter? presenter;
+    private readonly Http? http;
     
     private readonly List<ItemControl> itemControls = new();
     private IView _viewImplementation;
@@ -22,10 +24,12 @@ public partial class View : Window, IView
         InitializeComponent();
     }
 
-    public View(Presenter? presenter) : this()
+    public View(string baseUrl, Http http) : this()
     {
-        this.presenter = presenter;
-        this.ErrorPanel.RetryButton.Click += (sender, args) => this.presenter?.Load();
+        this.http = http;
+        var domain = new Domain(baseUrl, http);
+        presenter = new Presenter(domain, this);
+        this.ErrorPanel.RetryButton.Click += (sender, args) => presenter.Load();
     }
 
     public void SetLoadingVisible(bool value)
@@ -71,6 +75,12 @@ public partial class View : Window, IView
     public int GetNumericUpDownValue()
     {
         return (int)this.NumericUpDown.Value!;
+    }
+
+    public void OpenMangaDetail(string mangaUrl)
+    {
+        var window = new MangaDetail.View(mangaUrl, http!);
+        window.Show(owner:this);
     }
 
     public void SetListBoxContent(IEnumerable<Item> itemts)
@@ -157,14 +167,14 @@ public partial class View : Window, IView
 
     private void MyListBox_OnDoubleTapped(object? sender, TappedEventArgs e)
     {
-        Console.WriteLine("selected: " + this.MangaListBox.SelectedIndex);
+        presenter?.SelectManga(this.MangaListBox.SelectedIndex);
     }
 
     private void MyListBox_OnKeyUp(object? sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
-            Console.WriteLine("selected: " + this.MangaListBox.SelectedIndex);
+            presenter?.SelectManga(this.MangaListBox.SelectedIndex);
         }
     }
 

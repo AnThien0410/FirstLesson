@@ -6,6 +6,7 @@
         xmlns:vc="clr-namespace:MangaReader.ViewCommon"
         mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="250"
         Width="600" Height="800"
+        Title="MangaReader"
         x:Class="MangaReader.MangaList.View">
     
     <Panel>
